@@ -4,6 +4,8 @@ buildscript {
         groovyVersion = '2.4.5'
         gradleVersion = '2.9'
         jacksonVersion = '2.6.7'
+        licensePluginVersion = '0.13.1'
+        releasePluginVersion = '2.4.0'
         slf4jVersion = '1.7.12'
         spockVersion = '1.0-groovy-2.4'
 
@@ -17,6 +19,15 @@ buildscript {
 
     repositories {
         mavenCentral()
+        jcenter()
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+    }
+
+    dependencies {
+        classpath "gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:${licensePluginVersion}"
+        classpath "net.researchgate:gradle-release:${releasePluginVersion}"
     }
 }
 
@@ -27,10 +38,13 @@ task wrapper(type: Wrapper) {
 
 
 group = 'com.github.jonpeterson'
-version = '1.0.0-SNAPSHOT'
 
 apply plugin: 'java'
 apply plugin: 'groovy'
+apply plugin: 'com.github.hierynomus.license'
+apply plugin: 'net.researchgate.release'
+apply plugin: 'maven'
+apply plugin: 'signing'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
@@ -46,4 +60,83 @@ dependencies {
     testCompile groovy
     testCompile slf4jSimple
     testCompile spockCore
+}
+
+license {
+    include '**/*.java'
+    include '**/*.groovy'
+    mapping {
+        java = 'SLASHSTAR_STYLE'
+        groovy = 'SLASHSTAR_STYLE'
+    }
+}
+
+task javadocJar(type: Jar) {
+    dependsOn javadoc
+    classifier = 'javadoc'
+    from "$buildDir/javadoc"
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+build {
+    dependsOn javadocJar
+    dependsOn sourcesJar
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { deployment -> signing.signPom(deployment) }
+
+            repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
+                name 'Jackson Interceptor Module'
+                packaging 'jar'
+                description 'Module for Jackson that provides a means to modify the raw JSON data before deserialization and after serialization.'
+                url 'https://github.com/jonpeterson/jackson-module-json-interceptor'
+
+                scm {
+                    connection 'scm:git:git://github.com/jonpeterson/jackson-module-json-interceptor.git'
+                    developerConnection 'scm:git:git@github.com:jonpeterson/jackson-module-json-interceptor.git'
+                    url 'https://github.com/jonpeterson/jackson-module-json-interceptor'
+                }
+
+                licenses {
+                    license {
+                        name 'MIT License'
+                        url 'http://www.opensource.org/licenses/mit-license.php'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'jonpeterson'
+                        name 'Jonathan Peterson'
+                        email 'jonathan.p.peterson@gmail.com'
+                        url 'https://github.com/jonpeterson'
+                    }
+                }
+            }
+        }
+    }
 }
