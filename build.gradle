@@ -92,7 +92,6 @@ testJacksonVersions.each { version ->
         }
     }
 
-    //println jacksonDatabind.replace(jacksonVersion, version)
     dependencies {
         it."testJackson${safeVersion}Compile" jacksonDatabind.replace(jacksonVersion, version)
     }
