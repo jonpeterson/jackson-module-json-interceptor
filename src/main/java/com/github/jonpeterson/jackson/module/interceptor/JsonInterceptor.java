@@ -25,8 +25,21 @@
 package com.github.jonpeterson.jackson.module.interceptor;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
+/**
+ * Used with {@link JsonInterceptors} to intercept pre-deserialized or post-serialized JSON.
+ *
+ * <p><strong>Must expose a default, no-arg constructor.</strong></p>
+ */
 public interface JsonInterceptor {
 
-    JsonNode intercept(JsonNode jsonNode);
+    /**
+     * Transforms raw JSON data.
+     *
+     * @param jsonNode        the initial JSON data
+     * @param jsonNodeFactory a JSON node factory for creating new JSON nodes.
+     * @return the modified JSON data
+     */
+    JsonNode intercept(JsonNode jsonNode, JsonNodeFactory jsonNodeFactory);
 }

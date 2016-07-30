@@ -31,6 +31,9 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
+/**
+ * Jackson module to load when using {@link JsonInterceptors}.
+ */
 public class JsonInterceptorModule extends SimpleModule {
 
     public JsonInterceptorModule() {
@@ -51,6 +54,7 @@ public class JsonInterceptorModule extends SimpleModule {
                 return deserializer;
             }
 
+            // here just to make generics work without warnings
             private <T> JsonInterceptingDeserializer<T> createInterceptingDeserializer(StdDeserializer<T> deserializer, Class<? extends JsonInterceptor>[] interceptors) {
                 return new JsonInterceptingDeserializer<T>(deserializer, interceptors);
             }
@@ -72,6 +76,7 @@ public class JsonInterceptorModule extends SimpleModule {
                 return serializer;
             }
 
+            // here just to make generics work without warnings
             private <T> JsonInterceptingSerializer<T> createInterceptingSerializer(StdSerializer<T> serializer, Class<? extends JsonInterceptor>[] interceptors) {
                 return new JsonInterceptingSerializer<T>(serializer, interceptors);
             }

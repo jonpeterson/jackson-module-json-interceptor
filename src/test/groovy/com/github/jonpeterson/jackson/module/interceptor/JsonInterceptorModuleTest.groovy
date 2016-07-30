@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.IntNode
+import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.ObjectNode
 import spock.lang.Specification
 
@@ -55,8 +56,8 @@ class JsonInterceptorModuleTest extends Specification {
     static abstract class FieldClosureInterceptor implements JsonInterceptor {
 
         @Override
-        JsonNode intercept(JsonNode jsonNode) {
-            def objectNode = jsonNode as ObjectNode
+        JsonNode intercept(JsonNode node, JsonNodeFactory nodeFactory) {
+            def objectNode = node as ObjectNode
             objectNode.fields().each {
                 def newNode = updateField(it.value)
                 if(newNode != null)

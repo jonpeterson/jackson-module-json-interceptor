@@ -31,12 +31,23 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Specifies interceptors that should be instantiated and executed on pre-deserialized or post-serialized JSON.
+ */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @JacksonAnnotation
 public @interface JsonInterceptors {
 
+    /**
+     * @return interceptor classes that should be instantiated and executed on pre-deserialized JSON in the specified
+     *         order.
+     */
     Class<? extends JsonInterceptor>[] beforeDeserialization() default {};
 
+    /**
+     * @return interceptor classes that should be instantiated and executed on post-serialized JSON in the specified
+     *         order.
+     */
     Class<? extends JsonInterceptor>[] afterSerialization() default {};
 }

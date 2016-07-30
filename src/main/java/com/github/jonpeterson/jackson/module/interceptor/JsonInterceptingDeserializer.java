@@ -34,11 +34,11 @@ import com.fasterxml.jackson.databind.node.TreeTraversingParser;
 
 import java.io.IOException;
 
-public class JsonInterceptingDeserializer<T> extends StdDeserializer<T> implements ResolvableDeserializer{
+class JsonInterceptingDeserializer<T> extends StdDeserializer<T> implements ResolvableDeserializer{
     private final StdDeserializer<T> delegate;
     private final JsonInterceptor[] interceptors;
 
-    public JsonInterceptingDeserializer(StdDeserializer<T> delegate, Class<? extends JsonInterceptor>... interceptorClasses) {
+    JsonInterceptingDeserializer(StdDeserializer<T> delegate, Class<? extends JsonInterceptor>... interceptorClasses) {
         super(delegate.getValueType());
 
         this.delegate = delegate;
@@ -64,7 +64,7 @@ public class JsonInterceptingDeserializer<T> extends StdDeserializer<T> implemen
         JsonNode jsonNode = parser.readValueAsTree();
 
         for(JsonInterceptor interceptor: interceptors)
-            jsonNode = interceptor.intercept(jsonNode);
+            jsonNode = interceptor.intercept(jsonNode, context.getNodeFactory());
 
         JsonParser postInterceptionParser = new TreeTraversingParser(jsonNode, parser.getCodec());
         postInterceptionParser.nextToken();

@@ -29,17 +29,20 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.ser.ResolvableSerializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class JsonInterceptingSerializer<T> extends StdSerializer<T> implements ResolvableSerializer {
+class JsonInterceptingSerializer<T> extends StdSerializer<T> implements ResolvableSerializer {
+    private static final JsonNodeFactory jsonNodeFactory = new JsonNodeFactory(false);
+
     private final StdSerializer<T> delegate;
     private final JsonInterceptor[] interceptors;
 
-    public JsonInterceptingSerializer(StdSerializer<T> delegate, Class<? extends JsonInterceptor>... interceptorClasses) {
+    JsonInterceptingSerializer(StdSerializer<T> delegate, Class<? extends JsonInterceptor>... interceptorClasses) {
         super(delegate.handledType());
 
         this.delegate = delegate;
@@ -76,7 +79,7 @@ public class JsonInterceptingSerializer<T> extends StdSerializer<T> implements R
 
         // execute interceptors on node
         for(JsonInterceptor interceptor: interceptors)
-            jsonNode = interceptor.intercept(jsonNode);
+            jsonNode = interceptor.intercept(jsonNode, jsonNodeFactory);
 
         // write node
         generator.writeTree(jsonNode);
