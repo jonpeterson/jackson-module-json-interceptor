@@ -1,9 +1,11 @@
 buildscript {
     ext {
+        testJacksonVersions = ['2.2.0', '2.3.0', '2.4.0', '2.5.0', '2.6.0', '2.7.0', '2.8.0']
+
         // external dependency versions
         groovyVersion = '2.4.5'
-        gradleVersion = '2.9'
-        jacksonVersion = '2.6.7'
+        gradleVersion = '2.14.1'
+        jacksonVersion = "${testJacksonVersions.first()}+"
         licensePluginVersion = '0.13.1'
         releasePluginVersion = '2.4.0'
         slf4jVersion = '1.7.12'
@@ -33,7 +35,7 @@ buildscript {
 
 
 task wrapper(type: Wrapper) {
-    gradleVersion = gradleVersion
+    gradleVersion = this.gradleVersion
 }
 
 
@@ -70,6 +72,39 @@ license {
         groovy = 'SLASHSTAR_STYLE'
     }
 }
+
+// don't run tests with default test task
+test.excludes = ['**/*']
+
+// dynamically set up test executions for each version of Jackson
+testJacksonVersions.each { version ->
+    def safeVersion = version.replaceAll('\\.', '_')
+
+    configurations {
+        it."testJackson${safeVersion}Compile".extendsFrom testCompile
+        it."testJackson${safeVersion}Runtime".extendsFrom testRuntime
+    }
+
+    sourceSets{
+        it."testJackson$safeVersion" {
+            compileClasspath += sourceSets.main.output + sourceSets.test.output
+            runtimeClasspath += sourceSets.main.output + sourceSets.test.output
+        }
+    }
+
+    //println jacksonDatabind.replace(jacksonVersion, version)
+    dependencies {
+        it."testJackson${safeVersion}Compile" jacksonDatabind.replace(jacksonVersion, version)
+    }
+
+    task "testJackson$safeVersion"(type: Test) {
+        testClassesDir = sourceSets.test.output.classesDir
+        classpath = sourceSets."testJackson$safeVersion".runtimeClasspath
+    }
+
+    test.dependsOn "testJackson$safeVersion"
+}
+
 
 task javadocJar(type: Jar) {
     dependsOn javadoc
@@ -112,7 +147,7 @@ uploadArchives {
             pom.project {
                 name 'Jackson Interceptor Module'
                 packaging 'jar'
-                description 'Module for Jackson that provides a means to modify the raw JSON data before deserialization and after serialization.'
+                description 'Jackson 2.x module for intercepting and manipulating raw JSON before deserialization and after serialization.'
                 url 'https://github.com/jonpeterson/jackson-module-json-interceptor'
 
                 scm {
