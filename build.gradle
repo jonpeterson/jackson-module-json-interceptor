@@ -5,7 +5,7 @@ buildscript {
         // external dependency versions
         groovyVersion = '2.4.5'
         gradleVersion = '2.14.1'
-        jacksonVersion = "${testJacksonVersions.first()}+"
+        jacksonVersion = "[${testJacksonVersions.first()},)"
         licensePluginVersion = '0.13.1'
         releasePluginVersion = '2.4.0'
         slf4jVersion = '1.7.12'
